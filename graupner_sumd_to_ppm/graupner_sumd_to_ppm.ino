@@ -2,15 +2,20 @@
 
 #define PPM_OUTPUT_PIN 10
 
-#define PRINT_DEBUG
+//#define PRINT_DEBUG
 
 void setup() {
   ppmEncoder.begin(PPM_OUTPUT_PIN);
 
 #ifdef PRINT_DEBUG
   Serial.begin(115200);
-  while (!Serial) {
+  long start = millis();
+  bool stopWaitForUSB = false;
+  while (!Serial && !stopWaitForUSB) {
     ; // wait for native USB CDC to be ready
+    if (millis()-start > 2000) {
+      stopWaitForUSB=true;
+    }
   }
 #endif
 
@@ -34,31 +39,36 @@ static uint8_t sumd[SUMD_BUFFERSIZE]={0};
 void loop() {
   while (Serial1.available()) {
     int val = Serial1.read();
-    if (sumdIndex == 0 && val !=0xA8) {continue;}
+    if (sumdIndex == 0 && val !=0xA8) { continue; }
     if (sumdIndex == 2) { sumdSize = val; }
-    if (sumdIndex < SUMD_BUFFERSIZE ) {sumd[sumdIndex] = val;}
+    if (sumdIndex < SUMD_BUFFERSIZE ) { sumd[sumdIndex] = val; }
     sumdIndex++;
 
     if (sumdIndex == sumdSize*2+5) {
       if (sumdSize > SUMD_MAXCHAN) sumdSize = SUMD_MAXCHAN;
       for (uint8_t b = 0; b < sumdSize; b++) {
         rcValue[b] = ((sumd[2*b+3]<<8 | sumd[2*b+4]))>>3;
-        if (rcValue[b]>750 && rcValue[b]<2250) { channel[b] = rcValue[b];}
+        if (rcValue[b]>750 && rcValue[b]<2250) {
+#ifdef PRINT_DEBUG
+          channel[b] = rcValue[b];
+#endif
+          ppmEncoder.setChannel(b, rcValue[b]);
+        }
       }
     }
   }
 
-  ppmEncoder.setChannel(0, channel[0]);
-  Serial.print(channel[0]);
-  for (uint8_t i=1;i<NUM_CHANNELS;i++) {
-    ppmEncoder.setChannel(i, channel[i]);
 #ifdef PRINT_DEBUG
-    Serial.print("\t");
-    Serial.print(channel[i]);
-#endif
-  }
-#ifdef PRINT_DEBUG
-  Serial.println("");
+  debug();
 #endif
 
+}
+
+void debug() {
+  Serial.print(channel[0]);
+  for (uint8_t i=1;i<NUM_CHANNELS;i++) {
+    Serial.print("\t");
+    Serial.print(channel[i]);
+  }
+  Serial.println("");
 }
