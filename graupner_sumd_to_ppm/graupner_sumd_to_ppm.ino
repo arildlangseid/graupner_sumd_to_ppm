@@ -1,21 +1,34 @@
+/*
 #include "Wire.h"
 #include "Adafruit_GFX.h"
 #include "Adafruit_SSD1306.h"
+*/
+#include "PPMEncoder.h"
 
+#define PPM_OUTPUT_PIN 10
+
+//#define PRINT_DEBUG
+
+/*
 Adafruit_SSD1306 display(-1);
 
 #define DIS_WIDTH 128 // OLED display width, in pixels
 #define DIS_HEIGHT 64 // OLED display height, in pixels
+*/
 
+long start=0;
+long end=0;
 void setup() {
+#ifdef PRINT_DEBUG
   Serial.begin(115200);
-  long start = millis();
+  start = millis();
   while (!Serial) {
     ; // wait for native USB CDC to be ready
   }
-  long end = millis();
+  end = millis();
   Serial.print(F("USB delay:"));
   Serial.println(end-start);
+#endif
 
   start = millis();
   Serial1.begin(115200);
@@ -23,8 +36,12 @@ void setup() {
     ; // wait for native USB CDC to be ready
   }
   end = millis();
+#ifdef PRINT_DEBUG
   Serial.print(F("UART delay:"));
   Serial.println(end-start);
+#endif
+
+  ppmEncoder.begin(PPM_OUTPUT_PIN);
 
   //Initialize display by providing the display type and its I2C address.
   /*
@@ -70,13 +87,19 @@ void loop() {
     //if (val==0xA8) Serial.println("SUMD-frame Found.");
   }
 
+  ppmEncoder.setChannel(0, channel[0]);
   Serial.print(channel[0]);
   for (uint8_t i=1;i<NUM_CHANNELS;i++) {
+    ppmEncoder.setChannel(i, channel[i]);
+#ifdef PRINT_DEBUG
     Serial.print("\t");
     Serial.print(channel[i]);
+#endif
   }
+#ifdef PRINT_DEBUG
   Serial.println("");
-  delay(50);
+#endif
+//  delay(50);
 
   return;
 
