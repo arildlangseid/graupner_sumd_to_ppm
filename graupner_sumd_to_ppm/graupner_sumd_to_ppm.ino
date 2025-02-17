@@ -9,13 +9,8 @@ void setup() {
 
 #ifdef PRINT_DEBUG
   Serial.begin(115200);
-  long start = millis();
-  bool stopWaitForUSB = false;
   while (!Serial && !stopWaitForUSB) {
     ; // wait for native USB CDC to be ready
-    if (millis()-start > 2000) {
-      stopWaitForUSB=true;
-    }
   }
 #endif
 
@@ -27,7 +22,7 @@ void setup() {
 }
 
 #define NUM_CHANNELS 8
-int i, channel[NUM_CHANNELS], rcValue[NUM_CHANNELS];
+int channel[NUM_CHANNELS], rcValue[NUM_CHANNELS];
 
 #define SUMD_MAXCHAN NUM_CHANNELS
 #define SUMD_BUFFERSIZE SUMD_MAXCHAN*2+5
