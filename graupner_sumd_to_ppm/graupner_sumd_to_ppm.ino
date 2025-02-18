@@ -9,12 +9,12 @@
 // Uncomment for debug-printing
 //#define PRINT_DEBUG
 
-#define NUM_CHANNELS 8
-#define SUMD_MAXCHAN NUM_CHANNELS
+#define PPM_CHANNELS 8
+#define SUMD_MAXCHAN 16
 #define SUMD_BUFFERSIZE SUMD_MAXCHAN*2+5
 
 #ifdef PRINT_DEBUG
-static int channel[NUM_CHANNELS];
+static int channel[SUMD_MAXCHAN];
 #endif
 static uint8_t sumd[SUMD_BUFFERSIZE]={0};
 
@@ -43,11 +43,13 @@ void loop() {
     if (sumdIndex == 2) { sumdSize = val; }
     if (sumdIndex < SUMD_BUFFERSIZE ) { sumd[sumdIndex] = val; }
 
-    if (sumdIndex > 2 && sumdIndex % 2 == 0 && channelCounter < NUM_CHANNELS) {
+    if (sumdIndex > 2 && sumdIndex % 2 == 0 && channelCounter < sumdSize) {
       /*sumdIndex is even*/
       int rcValue = ((sumd[sumdIndex-1]<<8 | sumd[sumdIndex]))>>3;
       if (rcValue>750 && rcValue<2250) {
-        ppmEncoder.setChannel(channelCounter, rcValue);
+        if (channelCounter < PPM_CHANNELS) {
+          ppmEncoder.setChannel(channelCounter, rcValue);
+        }
         #ifdef PRINT_DEBUG
           channel[channelCounter] = rcValue;
         #endif
@@ -68,8 +70,10 @@ void loop() {
 
 #ifdef PRINT_DEBUG
 void debug() {
+  Serial.print(sumdSize);
+  Serial.print("\t");
   Serial.print(channel[0]);
-  for (uint8_t i=1;i<NUM_CHANNELS;i++) {
+  for (uint8_t i=1;i<sumdSize;i++) {
     Serial.print("\t");
     Serial.print(channel[i]);
   }
