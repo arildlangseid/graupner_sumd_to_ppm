@@ -30,28 +30,32 @@ int channel[NUM_CHANNELS], rcValue[NUM_CHANNELS];
 static uint8_t sumdIndex=0;
 static uint8_t sumdSize=0;
 static uint8_t sumd[SUMD_BUFFERSIZE]={0};
-
+static uint8_t channelCounter=0;
 void loop() {
-  while (Serial1.available()) {
+  if (Serial1.available()) {
     int val = Serial1.read();
-    if (sumdIndex == 0 && val !=0xA8) { continue; }
-    if (sumdIndex == 1 && val !=0x01) { sumdIndex = 0; continue; }
+    if (sumdIndex == 0 && val !=0xA8) { return; }
+    if (sumdIndex == 1 && val !=0x01) { sumdIndex = 0; return; }
     if (sumdIndex == 2) { sumdSize = val; }
     if (sumdIndex < SUMD_BUFFERSIZE ) { sumd[sumdIndex] = val; }
+
+    if (sumdIndex > 2 && sumdIndex % 2 == 0 && channelCounter < NUM_CHANNELS) {
+      /*sumdIndex is even*/
+      int rcValue = ((sumd[sumdIndex-1]<<8 | sumd[sumdIndex]))>>3;
+      if (rcValue>750 && rcValue<2250) {
+        ppmEncoder.setChannel(channelCounter, rcValue);
+        #ifdef PRINT_DEBUG
+          channel[channelCounter] = rcValue;
+        #endif
+        channelCounter++;
+      }
+    }
+    //if (sumdIndex > 2 && sumdIndex & 0x01) { /*sumdIndex is odd*/}
     sumdIndex++;
 
     if (sumdIndex == sumdSize*2+5) {
       sumdIndex = 0;
-      if (sumdSize > SUMD_MAXCHAN) sumdSize = SUMD_MAXCHAN;
-      for (uint8_t b = 0; b < sumdSize; b++) {
-        rcValue[b] = ((sumd[2*b+3]<<8 | sumd[2*b+4]))>>3;
-        if (rcValue[b]>750 && rcValue[b]<2250) {
-          ppmEncoder.setChannel(b, rcValue[b]);
-          #ifdef PRINT_DEBUG
-            channel[b] = rcValue[b];
-          #endif
-        }
-      }
+      channelCounter = 0;
     }
   }
 
