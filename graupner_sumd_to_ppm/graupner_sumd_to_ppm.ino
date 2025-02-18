@@ -35,6 +35,7 @@ void loop() {
   while (Serial1.available()) {
     int val = Serial1.read();
     if (sumdIndex == 0 && val !=0xA8) { continue; }
+    if (sumdIndex == 1 && val !=0x01) { sumdIndex = 0; continue; }
     if (sumdIndex == 2) { sumdSize = val; }
     if (sumdIndex < SUMD_BUFFERSIZE ) { sumd[sumdIndex] = val; }
     sumdIndex++;
