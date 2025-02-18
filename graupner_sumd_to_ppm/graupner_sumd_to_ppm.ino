@@ -28,6 +28,7 @@ void setup() {
   }
 #endif
 
+  // SUMD serial params 115200 baud, 8 bit, none parity, 1 stop bit
   Serial1.begin(115200);
 }
 
