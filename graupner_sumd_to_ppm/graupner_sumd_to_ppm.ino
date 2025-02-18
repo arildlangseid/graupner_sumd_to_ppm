@@ -23,16 +23,12 @@ void setup() {
 
 #ifdef PRINT_DEBUG
   Serial.begin(115200);
-  while (!Serial && !stopWaitForUSB) {
+  while (!Serial) {
     ; // wait for native USB CDC to be ready
   }
 #endif
 
   Serial1.begin(115200);
-  while (!Serial1) {
-    ; // wait for native USB CDC to be ready
-  }
-
 }
 
 static uint8_t sumdIndex=0;
@@ -57,7 +53,6 @@ void loop() {
         channelCounter++;
       }
     }
-    //if (sumdIndex > 2 && sumdIndex & 0x01) { /*sumdIndex is odd*/}
     sumdIndex++;
 
     if (sumdIndex == sumdSize*2+5) {
