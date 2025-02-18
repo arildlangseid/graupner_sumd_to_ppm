@@ -40,14 +40,15 @@ void loop() {
     sumdIndex++;
 
     if (sumdIndex == sumdSize*2+5) {
+      sumdIndex = 0;
       if (sumdSize > SUMD_MAXCHAN) sumdSize = SUMD_MAXCHAN;
       for (uint8_t b = 0; b < sumdSize; b++) {
         rcValue[b] = ((sumd[2*b+3]<<8 | sumd[2*b+4]))>>3;
         if (rcValue[b]>750 && rcValue[b]<2250) {
-#ifdef PRINT_DEBUG
-          channel[b] = rcValue[b];
-#endif
           ppmEncoder.setChannel(b, rcValue[b]);
+          #ifdef PRINT_DEBUG
+            channel[b] = rcValue[b];
+          #endif
         }
       }
     }
