@@ -1,8 +1,20 @@
 #include "PPMEncoder.h"
 
+// SUMD in is connected to Rx-pin
+// Code at the moment for Arduino Leonardo
+
+// Pin for PPM out
 #define PPM_OUTPUT_PIN 10
 
+// Uncomment for debug-printing
 //#define PRINT_DEBUG
+
+#define NUM_CHANNELS 8
+#define SUMD_MAXCHAN NUM_CHANNELS
+#define SUMD_BUFFERSIZE SUMD_MAXCHAN*2+5
+
+static int channel[NUM_CHANNELS];
+static uint8_t sumd[SUMD_BUFFERSIZE]={0};
 
 void setup() {
   ppmEncoder.begin(PPM_OUTPUT_PIN);
@@ -21,15 +33,8 @@ void setup() {
 
 }
 
-#define NUM_CHANNELS 8
-int channel[NUM_CHANNELS], rcValue[NUM_CHANNELS];
-
-#define SUMD_MAXCHAN NUM_CHANNELS
-#define SUMD_BUFFERSIZE SUMD_MAXCHAN*2+5
-
 static uint8_t sumdIndex=0;
 static uint8_t sumdSize=0;
-static uint8_t sumd[SUMD_BUFFERSIZE]={0};
 static uint8_t channelCounter=0;
 void loop() {
   if (Serial1.available()) {
@@ -56,13 +61,11 @@ void loop() {
     if (sumdIndex == sumdSize*2+5) {
       sumdIndex = 0;
       channelCounter = 0;
+#ifdef PRINT_DEBUG
+      debug();
+#endif
     }
   }
-
-#ifdef PRINT_DEBUG
-  debug();
-#endif
-
 }
 
 void debug() {
