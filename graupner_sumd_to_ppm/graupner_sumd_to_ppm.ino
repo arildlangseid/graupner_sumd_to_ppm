@@ -13,7 +13,9 @@
 #define SUMD_MAXCHAN NUM_CHANNELS
 #define SUMD_BUFFERSIZE SUMD_MAXCHAN*2+5
 
+#ifdef PRINT_DEBUG
 static int channel[NUM_CHANNELS];
+#endif
 static uint8_t sumd[SUMD_BUFFERSIZE]={0};
 
 void setup() {
@@ -68,6 +70,7 @@ void loop() {
   }
 }
 
+#ifdef PRINT_DEBUG
 void debug() {
   Serial.print(channel[0]);
   for (uint8_t i=1;i<NUM_CHANNELS;i++) {
@@ -76,3 +79,4 @@ void debug() {
   }
   Serial.println("");
 }
+#endif
