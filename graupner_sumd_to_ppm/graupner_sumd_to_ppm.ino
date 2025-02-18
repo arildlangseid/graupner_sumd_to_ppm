@@ -7,7 +7,7 @@
 #define PPM_OUTPUT_PIN 10
 
 // Uncomment for debug-printing
-#define PRINT_DEBUG
+//#define PRINT_DEBUG
 
 #define PPM_CHANNELS 8
 #define SUMD_MAXCHAN 16
@@ -29,15 +29,15 @@ void setup() {
 #endif
 
   // SUMD serial params 115200 baud, 8 bit, none parity, 1 stop bit
-  Serial1.begin(115200);
+  Serial.begin(115200);
 }
 
 static uint8_t sumdIndex=0;
 static uint8_t sumdSize=0;
 static uint8_t channelCounter=0;
 void loop() {
-  if (Serial1.available()) {
-    int val = Serial1.read();
+  if (Serial.available()) {
+    int val = Serial.read();
     // 0xA8 - start of frame
     if (sumdIndex == 0 && val != 0xA8) { return; }
     // 0x00 - SUMH
